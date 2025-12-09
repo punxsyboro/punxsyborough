@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Punxsutawney Borough Documents</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-alt: #020617;
+      --card-bg: #0b1120;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+      --text-main: #e5e7eb;
+      --text-muted: #94a3b8;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+      --radius-lg: 16px;
+      --radius-sm: 10px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.85);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b, #020617 58%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .shell {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px 40px;
+    }
+
+    header {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: clamp(2.1rem, 3.1vw, 2.6rem);
+      margin: 0;
+      color: #f9fafb;
+      letter-spacing: 0.03em;
+    }
+
+    .tagline {
+      margin-top: 8px;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    .pill {
+      font-size: 0.72rem;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      color: var(--text-muted);
+      backdrop-filter: blur(10px);
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    .pill strong {
+      color: #e5e7eb;
+    }
+
+    .layout {
+      display: grid;
+      gap: 18px;
+    }
+
+    @media (min-width: 880px) {
+      .layout {
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        align-items: flex-start;
+      }
+    }
+
+    .panel {
+      background:
+        radial-gradient(circle at top left, rgba(148, 163, 184, 0.18), transparent 55%),
+        var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 18px 18px 16px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.65), transparent 58%);
+      opacity: 0.12;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+      margin: 0 0 10px;
+    }
+
+    .section-title span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .section-title span svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .group {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(148, 163, 184, 0.45);
+    }
+
+    .group:first-of-type {
+      margin-top: 0;
+      padding-top: 2px;
+      border-top: none;
+    }
+
+    .group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .group-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .group-tag {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .doc-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .doc a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 9px;
+      border-radius: var(--radius-sm);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(51, 65, 85, 0.85);
+      text-decoration: none;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      transition:
+        border-color 160ms ease,
+        background 160ms ease,
+        transform 120ms ease;
+    }
+
+    .doc a:hover {
+      border-color: var(--accent);
+      background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.9),
+        rgba(15, 23, 42, 0.9),
+        var(--accent-soft)
+      );
+      transform: translateY(-1px);
+    }
+
+    .doc-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .doc-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .doc-title {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .doc-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 12px;
+      border-top: 1px dashed rgba(148, 163, 184, 0.4);
+      padding-top: 10px;
+    }
+
+    .sidebar-note {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .sidebar-note strong {
+      color: #e5e7eb;
+    }
+
+    .sidebar-box {
+      margin-top: 10px;
+      padding: 10px 11px;
+      border-radius: var(--radius-sm);
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      font-size: 0.78rem;
+    }
+
+    .sidebar-box ul {
+      margin: 6px 0 0;
+      padding-left: 18px;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.78rem;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 0.08em 0.4em;
+      border-radius: 999px;
+      border: 1px solid rgba(51, 65, 85, 0.85);
+    }
+
+    footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <h1>Punxsutawney Borough Documents</h1>
+      <p class="tagline">
+        Public reference copies of budget info, council minutes, and local projects.
+      </p>
+      <div class="pill-row">
+        <span class="pill"><strong>Domain</strong>&nbsp;&nbsp;punxsyborough.com</span>
+        <span class="pill">Static site · GitHub Pages</span>
+        <span class="pill">Docs as PDF links</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- MAIN DOCUMENT PANEL -->
+      <section class="panel" aria-labelledby="docs-heading">
+        <h2 class="section-title" id="docs-heading">
+          <span>
+            <!-- tiny svg icon -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor"
+                    d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2zm6 1.5V9h4.5L13 4.5z"/>
+            </svg>
+            Document library
+          </span>
+        </h2>
+
+        <!-- BUDGET -->
+        <!-- Duplicate this whole <section class="group"> block if you want more categories -->
+        <section class="group" aria-label="Budget documents">
+          <div class="group-header">
+            <h3 class="group-title">Budget</h3>
+            <span class="group-tag">Annual finances &amp; tax rates</span>
+          </div>
+          <ul class="doc-list">
+            <!-- Example entries; change href and titles for your real files -->
+            <li class="doc">
+              <a href="docs/budget/2025-budget-adopted.pdf" target="_blank" rel="noopener">
+                <div class="doc-main">
+                  <span class="doc-icon">📄</span>
+                  <span class="doc-title">2025 Adopted Budget</span>
+                </div>
+                <span class="doc-meta">PDF · 2025</span>
+              </a>
+            </li>
+            <li class="doc">
+              <a href="docs/budget/2024-budget-summary.pdf" target="_blank" rel="noopener">
+                <div class="doc-main">
+                  <span class="doc-icon">📄</span>
+                  <span class="doc-title">2024 Budget Summary</span>
+                </div>
+                <span class="doc-meta">PDF · 2024</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <!-- COUNCIL MINUTES -->
+        <section class="group" aria-label="Council minutes">
+          <div class="group-header">
+            <h3 class="group-title">Council Minutes</h3>
+            <span class="group-tag">Meeting records</span>
+          </div>
+          <ul class="doc-list">
+            <li class="doc">
+              <a href="docs/council-minutes/2025-01-08-minutes.pdf" target="_blank" rel="noopener">
+                <div class="doc-main">
+                  <span class="doc-icon">📝</span>
+                  <span class="doc-title">Council Minutes – Jan 8, 2025</span>
+                </div>
+                <span class="doc-meta">PDF</span>
+              </a>
+            </li>
+            <li class="doc">
+              <a href="docs/council-minutes/2024-12-11-minutes.pdf" target="_blank" rel="noopener">
+                <div class="doc-main">
+                  <span class="doc-icon">📝</span>
+                  <span class="doc-title">Council Minutes – Dec 11, 2024</span>
+                </div>
+                <span class="doc-meta">PDF</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <!-- BOWLING ALLEY -->
+        <section class="group" aria-label="Bowling alley project">
+          <div class="group-header">
+            <h3 class="group-title">Bowling Alley</h3>
+            <span class="group-tag">Project documents</span>
+          </div>
+          <ul class="doc-list">
+            <li class="doc">
+              <a href="docs/bowling-alley/feasibility-study.pdf" target="_blank" rel="noopener">
+                <div class="doc-main">
+                  <span class="doc-icon">🎳</span>
+                  <span class="doc-title">Feasibility Study</span>
+                </div>
+                <span class="doc-meta">PDF</span>
+              </a>
+            </li>
+            <li class="doc">
+              <a href="docs/bowling-alley/site-plan.pdf" target="_blank" rel="noopener">
+                <div class="doc-main">
+                  <span class="doc-icon">📐</span>
+                  <span class="doc-title">Preliminary Site Plan</span>
+                </div>
+                <span class="doc-meta">PDF</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <!-- SOLAR FARM -->
+        <section class="group" aria-label="Solar farm project">
+          <div class="group-header">
+            <h3 class="group-title">Solar Farm</h3>
+            <span class="group-tag">Zoning &amp; agreements</span>
+          </div>
+          <ul class="doc-list">
+            <li class="doc">
+              <a href="docs/solar-farm/zoning-hearing-application.pdf" target="_blank" rel="noopener">
+                <div class="doc-main">
+                  <span class="doc-icon">🔆</span>
+                  <span class="doc-title">Zoning Hearing Application</span>
+                </div>
+                <span class="doc-meta">PDF</span>
+              </a>
+            </li>
+            <li class="doc">
+              <a href="docs/solar-farm/lease-agreement-draft.pdf" target="_blank" rel="noopener">
+                <div class="doc-main">
+                  <span class="doc-icon">📑</span>
+                  <span class="doc-title">Draft Lease Agreement</span>
+                </div>
+                <span class="doc-meta">PDF</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <p class="hint">
+          To add or update documents, edit this page in your GitHub repository and change the
+          <code>href=""</code> and link text for each list item.
+        </p>
+      </section>
+
+      <!-- SIDE PANEL / NOTES -->
+      <aside class="panel" aria-label="About this site">
+        <h2 class="section-title">
+          <span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor"
+                    d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            About this site
+          </span>
+        </h2>
+        <p class="sidebar-note">
+          This is a plain static site: just a single <strong>HTML file</strong> served via
+          <strong>GitHub Pages</strong>, mapped to the domain <strong>punxsyborough.com</strong>.
+        </p>
+        <div class="sidebar-box">
+          <p>Quick editing guide:</p>
+          <ul>
+            <li>Each heading (Budget, Council Minutes, etc.) is a <code>&lt;section class="group"&gt;</code>.</li>
+            <li>Each document link is a <code>&lt;li class="doc"&gt;...&lt;/li&gt;</code> entry.</li>
+            <li>Upload PDFs into a <code>docs/</code> folder in the repo and update the <code>href</code> paths.</li>
+          </ul>
+        </div>
+        <div class="sidebar-box">
+          <p><strong>Accessibility tips</strong> when you add new docs:</p>
+          <ul>
+            <li>Use meaningful link text (e.g. “Budget Ordinance 2025‑03”).</li>
+            <li>Keep dates in the title (e.g. “Jan 8, 2025”).</li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <p>
+        Static public document archive for Punxsutawney Borough.
+        Built with plain HTML/CSS and hosted on GitHub Pages.
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
