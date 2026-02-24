@@ -503,8 +503,6 @@ function renderAdminGroups() {
         const li = docFragment.querySelector(".admin-document-item");
         const titleInput = docFragment.querySelector(".doc-title-edit");
         const urlInput = docFragment.querySelector(".doc-url-edit");
-        const moveDocUpButton = docFragment.querySelector(".move-doc-up");
-        const moveDocDownButton = docFragment.querySelector(".move-doc-down");
         const saveButton = docFragment.querySelector(".save-doc");
         const deleteButton = docFragment.querySelector(".delete-doc");
 
@@ -512,8 +510,6 @@ function renderAdminGroups() {
         li.draggable = true;
         titleInput.value = docRecord.title;
         urlInput.value = docRecord.url;
-        moveDocUpButton.disabled = docIndex === 0;
-        moveDocDownButton.disabled = docIndex === docs.length - 1;
 
         li.addEventListener("dragstart", (event) => {
           if (event.target !== li) {
@@ -605,30 +601,6 @@ function renderAdminGroups() {
           if (draggedDocumentContext?.groupId === group.id) {
             event.preventDefault();
           }
-        });
-
-        moveDocUpButton.addEventListener("click", async () => {
-          if (docIndex === 0) {
-            return;
-          }
-
-          const reorderedDocs = docs.slice();
-          const [movedDoc] = reorderedDocs.splice(docIndex, 1);
-          reorderedDocs.splice(docIndex - 1, 0, movedDoc);
-          await persistDocumentSortOrder(group.id, reorderedDocs);
-          notify(`Moved document up: ${docRecord.title}`);
-        });
-
-        moveDocDownButton.addEventListener("click", async () => {
-          if (docIndex === docs.length - 1) {
-            return;
-          }
-
-          const reorderedDocs = docs.slice();
-          const [movedDoc] = reorderedDocs.splice(docIndex, 1);
-          reorderedDocs.splice(docIndex + 1, 0, movedDoc);
-          await persistDocumentSortOrder(group.id, reorderedDocs);
-          notify(`Moved document down: ${docRecord.title}`);
         });
 
         saveButton.addEventListener("click", async () => {
