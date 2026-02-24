@@ -14,19 +14,43 @@
   </head>
   <body>
     <div class="background-glow"></div>
-    <header class="site-header">
-      <h1>Punxsutawney Borough Documents</h1>
-      <p>Public records grouped for transparency and easy access.</p>
+
+    <header class="top-banner">
+      <div class="banner-inner">
+        <a class="brand-link" href="index.html" aria-label="Punxsutawney Borough Documents Home">
+          <img
+            class="brand-logo"
+            src="assets/images/logo.png"
+            alt="Punxsutawney Borough Open Records Logo"
+            width="64"
+            height="64"
+          />
+          <span class="brand-name">Punxsutawney Borough Documents</span>
+        </a>
+        <a class="btn btn-small btn-admin" href="admin.html">Admin</a>
+      </div>
     </header>
 
-    <main class="layout">
-      <section class="panel public-panel">
-        <div class="panel-header">
-          <h2>Public Documents</h2>
-        </div>
-        <div id="publicGroups" class="groups"></div>
+    <main class="page-shell">
+      <!--<section class="hero" aria-labelledby="pageTitle">
+        <p class="hero-kicker">Public Records Portal</p>
+        <p class="hero-subtitle">Public records grouped for transparency and easy access.</p>
+      </section>-->
+
+      <section class="layout">
+        <article class="panel public-panel">
+          <div class="panel-header">
+            <h2>Public Records Portal</h2>
+          </div>
+          <p class="hint">Public records grouped for transparency and easy access.</p>
+          <div id="publicGroups" class="groups"></div>
+        </article>
       </section>
     </main>
+
+    <footer class="site-footer">
+      <p>This website is independently operated and is not an official Borough of Punxsutawney government website.</p>
+    </footer>
 
     <template id="publicGroupTemplate">
       <article class="group-card">
