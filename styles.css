@@ -163,6 +163,8 @@ input {
   padding: 0.54rem 0.75rem;
   background: var(--brand);
   color: #fff;
+  display: inline-block;
+  text-decoration: none;
   cursor: pointer;
   font: inherit;
 }
@@ -233,6 +235,10 @@ input {
   .layout {
     grid-template-columns: 2fr 1fr;
     align-items: start;
+  }
+
+  .layout > :only-child {
+    grid-column: 1 / -1;
   }
 
   .admin-panel {

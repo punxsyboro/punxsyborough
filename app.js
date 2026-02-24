@@ -47,6 +47,9 @@ const adminPanelEl = document.getElementById("adminPanel");
 const authStatusEl = document.getElementById("authStatus");
 const signOutButton = document.getElementById("signOutButton");
 const signInWithGoogleButton = document.getElementById("signInWithGoogleButton");
+const addGroupFormEl = document.getElementById("addGroupForm");
+const newGroupNameInput = document.getElementById("newGroupName");
+const refreshButton = document.getElementById("refreshButton");
 
 const publicGroupTemplate = document.getElementById("publicGroupTemplate");
 const adminGroupTemplate = document.getElementById("adminGroupTemplate");
@@ -58,7 +61,9 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
 function setStatus(message) {
-  authStatusEl.textContent = message;
+  if (authStatusEl) {
+    authStatusEl.textContent = message;
+  }
 }
 
 function notify(message) {
@@ -139,6 +144,10 @@ async function deleteStoredFile(storagePath, storageBucket = null) {
 }
 
 function renderPublicGroups() {
+  if (!publicGroupsEl || !publicGroupTemplate) {
+    return;
+  }
+
   publicGroupsEl.innerHTML = "";
 
   const groups = Array.from(groupData.values()).sort((a, b) => {
@@ -184,6 +193,10 @@ function renderPublicGroups() {
 }
 
 function renderAdminGroups() {
+  if (!adminGroupsEl || !adminGroupTemplate || !adminDocumentTemplate) {
+    return;
+  }
+
   adminGroupsEl.innerHTML = "";
 
   if (!isAdminUser) {
@@ -425,66 +438,85 @@ onAuthStateChanged(auth, (user) => {
   isAdminUser = Boolean(user && adminEmails.has(email));
 
   if (user && isAdminUser) {
-    adminPanelEl.classList.remove("hidden");
-    adminPanelEl.setAttribute("aria-hidden", "false");
-    signOutButton.disabled = false;
+    if (adminPanelEl) {
+      adminPanelEl.classList.remove("hidden");
+      adminPanelEl.setAttribute("aria-hidden", "false");
+    }
+    if (signOutButton) {
+      signOutButton.disabled = false;
+    }
     setStatus(`Signed in as ${user.email}. Admin mode enabled.`);
   } else if (user) {
-    adminPanelEl.classList.add("hidden");
-    adminPanelEl.setAttribute("aria-hidden", "true");
-    signOutButton.disabled = false;
+    if (adminPanelEl) {
+      adminPanelEl.classList.add("hidden");
+      adminPanelEl.setAttribute("aria-hidden", "true");
+    }
+    if (signOutButton) {
+      signOutButton.disabled = false;
+    }
     setStatus(`Signed in as ${user.email}. This account is not an admin.`);
   } else {
-    adminPanelEl.classList.add("hidden");
-    adminPanelEl.setAttribute("aria-hidden", "true");
-    signOutButton.disabled = true;
+    if (adminPanelEl) {
+      adminPanelEl.classList.add("hidden");
+      adminPanelEl.setAttribute("aria-hidden", "true");
+    }
+    if (signOutButton) {
+      signOutButton.disabled = true;
+    }
     setStatus("Not signed in.");
   }
 
   renderAll();
 });
 
-signInWithGoogleButton.addEventListener("click", async () => {
-  try {
-    await signInWithPopup(auth, googleProvider);
-  } catch (error) {
-    notify(`Google sign in failed: ${error.message}`);
-  }
-});
-
-signOutButton.addEventListener("click", async () => {
-  await signOut(auth);
-  notify("Signed out.");
-});
-
-document.getElementById("addGroupForm").addEventListener("submit", async (event) => {
-  event.preventDefault();
-  if (!isAdminUser) {
-    notify("Admin login required to add groups.");
-    return;
-  }
-
-  const input = document.getElementById("newGroupName");
-  const name = input.value.trim();
-  if (!name) {
-    notify("Group name is required.");
-    return;
-  }
-
-  await addDoc(collection(db, "groups"), {
-    name,
-    sortOrder: Date.now(),
-    createdAt: serverTimestamp(),
+if (signInWithGoogleButton) {
+  signInWithGoogleButton.addEventListener("click", async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      notify(`Google sign in failed: ${error.message}`);
+    }
   });
+}
 
-  input.value = "";
-  notify(`Added group: ${name}`);
-});
+if (signOutButton) {
+  signOutButton.addEventListener("click", async () => {
+    await signOut(auth);
+    notify("Signed out.");
+  });
+}
 
-document.getElementById("refreshButton").addEventListener("click", () => {
-  renderAll();
-  notify("View refreshed.");
-});
+if (addGroupFormEl) {
+  addGroupFormEl.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!isAdminUser) {
+      notify("Admin login required to add groups.");
+      return;
+    }
+
+    const name = newGroupNameInput?.value.trim() || "";
+    if (!name) {
+      notify("Group name is required.");
+      return;
+    }
+
+    await addDoc(collection(db, "groups"), {
+      name,
+      sortOrder: Date.now(),
+      createdAt: serverTimestamp(),
+    });
+
+    newGroupNameInput.value = "";
+    notify(`Added group: ${name}`);
+  });
+}
+
+if (refreshButton) {
+  refreshButton.addEventListener("click", () => {
+    renderAll();
+    notify("View refreshed.");
+  });
+}
 
 if (settings.seedExampleData) {
   (async () => {

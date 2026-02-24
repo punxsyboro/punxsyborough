@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | Punxsutawney Borough Council Documents</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="background-glow"></div>
+    <header class="site-header">
+      <h1>Document Administration</h1>
+      <p>Manage groups, uploads, and document links.</p>
+      <p><a class="btn btn-secondary" href="index.html">Back to Public Documents</a></p>
+    </header>
+
+    <main class="layout">
+      <section class="panel auth-panel">
+        <h2>Admin Access</h2>
+        <p class="hint">Sign in with Google to manage groups and links.</p>
+        <div class="stack">
+          <div class="actions">
+            <button id="signInWithGoogleButton" class="btn btn-google" type="button">Sign In with Google</button>
+            <button id="signOutButton" class="btn btn-secondary" type="button" disabled>Sign Out</button>
+          </div>
+        </div>
+        <p id="authStatus" class="status">Not signed in.</p>
+      </section>
+
+      <section id="adminPanel" class="panel admin-panel hidden" aria-hidden="true">
+        <div class="panel-header">
+          <h2>Admin Controls</h2>
+          <button id="refreshButton" class="btn btn-secondary" type="button">Refresh</button>
+        </div>
+        <p class="hint">Add, rename, reorder, upload, or remove groups and documents.</p>
+
+        <form id="addGroupForm" class="inline-form">
+          <input id="newGroupName" type="text" required placeholder="New group name (e.g., Budgets)" />
+          <button class="btn" type="submit">Add Group</button>
+        </form>
+
+        <div id="adminGroups" class="groups admin-groups"></div>
+      </section>
+    </main>
+
+    <template id="adminGroupTemplate">
+      <article class="group-card admin-card">
+        <div class="group-admin-header">
+          <input class="group-name-input" type="text" />
+          <div class="actions">
+            <button class="btn btn-small save-group" type="button">Save</button>
+            <button class="btn btn-small btn-danger delete-group" type="button">Delete</button>
+          </div>
+        </div>
+
+        <form class="inline-form add-doc-form">
+          <input class="doc-title-input" type="text" required placeholder="Document title" />
+          <input
+            class="doc-file-input"
+            type="file"
+            required
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.odt,.ods,.odp"
+          />
+          <button class="btn btn-small" type="submit">Add Document</button>
+        </form>
+
+        <ul class="documents admin-documents"></ul>
+      </article>
+    </template>
+
+    <template id="adminDocumentTemplate">
+      <li class="document-item admin-document-item">
+        <input class="doc-title-edit" type="text" />
+        <input class="doc-url-edit" type="url" />
+        <div class="actions">
+          <button class="btn btn-small save-doc" type="button">Save</button>
+          <button class="btn btn-small btn-danger delete-doc" type="button">Delete</button>
+        </div>
+      </li>
+    </template>
+
+    <script src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

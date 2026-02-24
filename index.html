@@ -23,33 +23,12 @@
       <section class="panel public-panel">
         <div class="panel-header">
           <h2>Public Documents</h2>
-          <button id="refreshButton" class="btn btn-secondary" type="button">Refresh</button>
-        </div>
-        <div id="publicGroups" class="groups"></div>
-      </section>
-
-      <section class="panel auth-panel">
-        <h2>Admin Access</h2>
-        <p class="hint">Sign in with Google to manage groups and links.</p>
-        <div class="stack">
           <div class="actions">
-            <button id="signInWithGoogleButton" class="btn btn-google" type="button">Sign In with Google</button>
-            <button id="signOutButton" class="btn btn-secondary" type="button" disabled>Sign Out</button>
+            <button id="refreshButton" class="btn btn-secondary" type="button">Refresh</button>
+            <a class="btn" href="admin.html">Admin</a>
           </div>
         </div>
-        <p id="authStatus" class="status">Not signed in.</p>
-      </section>
-
-      <section id="adminPanel" class="panel admin-panel hidden" aria-hidden="true">
-        <h2>Admin Controls</h2>
-        <p class="hint">Add, rename, reorder, upload, or remove groups and documents.</p>
-
-        <form id="addGroupForm" class="inline-form">
-          <input id="newGroupName" type="text" required placeholder="New group name (e.g., Budgets)" />
-          <button class="btn" type="submit">Add Group</button>
-        </form>
-
-        <div id="adminGroups" class="groups admin-groups"></div>
+        <div id="publicGroups" class="groups"></div>
       </section>
     </main>
 
@@ -58,42 +37,6 @@
         <h3 class="group-title"></h3>
         <ul class="documents"></ul>
       </article>
-    </template>
-
-    <template id="adminGroupTemplate">
-      <article class="group-card admin-card">
-        <div class="group-admin-header">
-          <input class="group-name-input" type="text" />
-          <div class="actions">
-            <button class="btn btn-small save-group" type="button">Save</button>
-            <button class="btn btn-small btn-danger delete-group" type="button">Delete</button>
-          </div>
-        </div>
-
-        <form class="inline-form add-doc-form">
-          <input class="doc-title-input" type="text" required placeholder="Document title" />
-          <input
-            class="doc-file-input"
-            type="file"
-            required
-            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.odt,.ods,.odp"
-          />
-          <button class="btn btn-small" type="submit">Add Document</button>
-        </form>
-
-        <ul class="documents admin-documents"></ul>
-      </article>
-    </template>
-
-    <template id="adminDocumentTemplate">
-      <li class="document-item admin-document-item">
-        <input class="doc-title-edit" type="text" />
-        <input class="doc-url-edit" type="url" />
-        <div class="actions">
-          <button class="btn btn-small save-doc" type="button">Save</button>
-          <button class="btn btn-small btn-danger delete-doc" type="button">Delete</button>
-        </div>
-      </li>
     </template>
 
     <script src="firebase-config.js"></script>

@@ -19,7 +19,8 @@ So the site can be hosted on GitHub Pages while the data/auth live in Firebase.
 
 ## File overview
 
-- `index.html`: page structure
+- `index.html`: public documents page
+- `admin.html`: admin sign-in and management page
 - `styles.css`: visual design
 - `app.js`: Firebase + CRUD logic
 - `firebase-config.js`: your Firebase app settings and admin email allowlist
