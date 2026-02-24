@@ -173,6 +173,27 @@ let draggedGroupId = null;
 let isGroupDragDirty = false;
 let draggedDocumentContext = null;
 let isDocumentDragDirty = false;
+let lastPointerDownTarget = null;
+
+document.addEventListener(
+  "pointerdown",
+  (event) => {
+    lastPointerDownTarget = event.target;
+  },
+  true,
+);
+
+function dragOriginTarget(fallbackTarget) {
+  if (lastPointerDownTarget instanceof Element) {
+    return lastPointerDownTarget;
+  }
+  return fallbackTarget instanceof Element ? fallbackTarget : null;
+}
+
+function dragStartedFromTextBox(fallbackTarget) {
+  const origin = dragOriginTarget(fallbackTarget);
+  return Boolean(origin?.closest("input, textarea, select"));
+}
 
 function reorderElementWithinContainer(draggedElement, targetElement, pointerY) {
   if (!draggedElement || !targetElement || draggedElement === targetElement) {
@@ -269,8 +290,8 @@ function renderAdminGroups() {
   for (const [groupIndex, group] of groups.entries()) {
     const fragment = adminGroupTemplate.content.cloneNode(true);
     const groupCard = fragment.querySelector(".admin-card");
+    const groupHeader = fragment.querySelector(".group-admin-header");
     const nameInput = fragment.querySelector(".group-name-input");
-    const dragGroupHandle = fragment.querySelector(".drag-group-handle");
     const moveGroupUpButton = fragment.querySelector(".move-group-up");
     const moveGroupDownButton = fragment.querySelector(".move-group-down");
     const saveGroupButton = fragment.querySelector(".save-group");
@@ -279,11 +300,20 @@ function renderAdminGroups() {
     const documentsEl = fragment.querySelector(".admin-documents");
 
     groupCard.dataset.groupId = group.id;
+    groupHeader.draggable = true;
     nameInput.value = group.name;
     moveGroupUpButton.disabled = groupIndex === 0;
     moveGroupDownButton.disabled = groupIndex === groups.length - 1;
 
-    dragGroupHandle.addEventListener("dragstart", (event) => {
+    groupHeader.addEventListener("dragstart", (event) => {
+      if (event.target !== groupHeader) {
+        return;
+      }
+      if (dragStartedFromTextBox(event.target)) {
+        event.preventDefault();
+        return;
+      }
+
       draggedGroupId = group.id;
       isGroupDragDirty = false;
       groupCard.classList.add("is-dragging");
@@ -294,7 +324,11 @@ function renderAdminGroups() {
       }
     });
 
-    dragGroupHandle.addEventListener("dragend", async () => {
+    groupHeader.addEventListener("dragend", async (event) => {
+      if (event.target !== groupHeader) {
+        return;
+      }
+
       groupCard.classList.remove("is-dragging");
       const isActiveDrag = draggedGroupId === group.id;
       draggedGroupId = null;
@@ -469,19 +503,27 @@ function renderAdminGroups() {
         const li = docFragment.querySelector(".admin-document-item");
         const titleInput = docFragment.querySelector(".doc-title-edit");
         const urlInput = docFragment.querySelector(".doc-url-edit");
-        const dragDocHandle = docFragment.querySelector(".drag-doc-handle");
         const moveDocUpButton = docFragment.querySelector(".move-doc-up");
         const moveDocDownButton = docFragment.querySelector(".move-doc-down");
         const saveButton = docFragment.querySelector(".save-doc");
         const deleteButton = docFragment.querySelector(".delete-doc");
 
         li.dataset.documentId = docRecord.id;
+        li.draggable = true;
         titleInput.value = docRecord.title;
         urlInput.value = docRecord.url;
         moveDocUpButton.disabled = docIndex === 0;
         moveDocDownButton.disabled = docIndex === docs.length - 1;
 
-        dragDocHandle.addEventListener("dragstart", (event) => {
+        li.addEventListener("dragstart", (event) => {
+          if (event.target !== li) {
+            return;
+          }
+          if (dragStartedFromTextBox(event.target)) {
+            event.preventDefault();
+            return;
+          }
+
           draggedDocumentContext = {
             groupId: group.id,
             documentId: docRecord.id,
@@ -495,7 +537,11 @@ function renderAdminGroups() {
           }
         });
 
-        dragDocHandle.addEventListener("dragend", async () => {
+        li.addEventListener("dragend", async (event) => {
+          if (event.target !== li) {
+            return;
+          }
+
           li.classList.remove("is-dragging");
 
           const activeDrag = draggedDocumentContext;

@@ -197,14 +197,19 @@ input {
   font-size: 0.88rem;
 }
 
-.drag-group-handle,
-.drag-doc-handle {
+.group-admin-header,
+.admin-document-item {
   cursor: grab;
 }
 
-.drag-group-handle:active,
-.drag-doc-handle:active {
+.group-admin-header:active,
+.admin-document-item:active {
   cursor: grabbing;
+}
+
+.group-admin-header input,
+.admin-document-item input {
+  cursor: text;
 }
 
 .btn-danger {
