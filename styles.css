@@ -197,6 +197,16 @@ input {
   font-size: 0.88rem;
 }
 
+.drag-group-handle,
+.drag-doc-handle {
+  cursor: grab;
+}
+
+.drag-group-handle:active,
+.drag-doc-handle:active {
+  cursor: grabbing;
+}
+
 .btn-danger {
   background: var(--danger);
 }
@@ -219,6 +229,11 @@ input {
   padding: 0.55rem;
   border-radius: 8px;
   background: #fff;
+}
+
+.admin-card.is-dragging,
+.admin-document-item.is-dragging {
+  opacity: 0.55;
 }
 
 .hidden {

@@ -143,6 +143,59 @@ async function deleteStoredFile(storagePath, storageBucket = null) {
   }
 }
 
+const ORDER_STEP = 1_000;
+
+function getSortOrderValue(index) {
+  return (index + 1) * ORDER_STEP;
+}
+
+async function persistGroupSortOrder(orderedGroups) {
+  await Promise.all(
+    orderedGroups.map((group, index) =>
+      updateDoc(doc(db, "groups", group.id), {
+        sortOrder: getSortOrderValue(index),
+      }),
+    ),
+  );
+}
+
+async function persistDocumentSortOrder(groupId, orderedDocuments) {
+  await Promise.all(
+    orderedDocuments.map((documentRecord, index) =>
+      updateDoc(doc(db, "groups", groupId, "documents", documentRecord.id), {
+        sortOrder: getSortOrderValue(index),
+      }),
+    ),
+  );
+}
+
+let draggedGroupId = null;
+let isGroupDragDirty = false;
+let draggedDocumentContext = null;
+let isDocumentDragDirty = false;
+
+function reorderElementWithinContainer(draggedElement, targetElement, pointerY) {
+  if (!draggedElement || !targetElement || draggedElement === targetElement) {
+    return false;
+  }
+
+  const targetParent = targetElement.parentElement;
+  if (!targetParent || draggedElement.parentElement !== targetParent) {
+    return false;
+  }
+
+  const targetBounds = targetElement.getBoundingClientRect();
+  const insertAfter = pointerY > targetBounds.top + targetBounds.height / 2;
+  const referenceNode = insertAfter ? targetElement.nextElementSibling : targetElement;
+
+  if (referenceNode === draggedElement) {
+    return false;
+  }
+
+  targetParent.insertBefore(draggedElement, referenceNode);
+  return true;
+}
+
 function renderPublicGroups() {
   if (!publicGroupsEl || !publicGroupTemplate) {
     return;
@@ -213,16 +266,114 @@ function renderAdminGroups() {
     return;
   }
 
-  for (const group of groups) {
+  for (const [groupIndex, group] of groups.entries()) {
     const fragment = adminGroupTemplate.content.cloneNode(true);
     const groupCard = fragment.querySelector(".admin-card");
     const nameInput = fragment.querySelector(".group-name-input");
+    const dragGroupHandle = fragment.querySelector(".drag-group-handle");
+    const moveGroupUpButton = fragment.querySelector(".move-group-up");
+    const moveGroupDownButton = fragment.querySelector(".move-group-down");
     const saveGroupButton = fragment.querySelector(".save-group");
     const deleteGroupButton = fragment.querySelector(".delete-group");
     const addDocForm = fragment.querySelector(".add-doc-form");
     const documentsEl = fragment.querySelector(".admin-documents");
 
+    groupCard.dataset.groupId = group.id;
     nameInput.value = group.name;
+    moveGroupUpButton.disabled = groupIndex === 0;
+    moveGroupDownButton.disabled = groupIndex === groups.length - 1;
+
+    dragGroupHandle.addEventListener("dragstart", (event) => {
+      draggedGroupId = group.id;
+      isGroupDragDirty = false;
+      groupCard.classList.add("is-dragging");
+
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", group.id);
+      }
+    });
+
+    dragGroupHandle.addEventListener("dragend", async () => {
+      groupCard.classList.remove("is-dragging");
+      const isActiveDrag = draggedGroupId === group.id;
+      draggedGroupId = null;
+
+      if (!isActiveDrag || !isGroupDragDirty) {
+        return;
+      }
+
+      isGroupDragDirty = false;
+
+      const orderedGroupIds = Array.from(adminGroupsEl.querySelectorAll(".admin-card"))
+        .map((card) => card.dataset.groupId)
+        .filter(Boolean);
+      const groupsById = new Map(groups.map((item) => [item.id, item]));
+      const orderedGroups = orderedGroupIds.map((groupId) => groupsById.get(groupId)).filter(Boolean);
+
+      if (orderedGroups.length !== groups.length) {
+        notify("Unable to reorder groups. Try refreshing.");
+        return;
+      }
+
+      try {
+        await persistGroupSortOrder(orderedGroups);
+        notify("Saved group order.");
+      } catch (error) {
+        notify(`Failed to save group order: ${error.message}`);
+      }
+    });
+
+    groupCard.addEventListener("dragover", (event) => {
+      if (!draggedGroupId || draggedGroupId === group.id) {
+        return;
+      }
+
+      event.preventDefault();
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "move";
+      }
+
+      const draggedCard = adminGroupsEl.querySelector(`.admin-card[data-group-id="${draggedGroupId}"]`);
+      if (!draggedCard) {
+        return;
+      }
+
+      const moved = reorderElementWithinContainer(draggedCard, groupCard, event.clientY);
+      if (moved) {
+        isGroupDragDirty = true;
+      }
+    });
+
+    groupCard.addEventListener("drop", (event) => {
+      if (draggedGroupId) {
+        event.preventDefault();
+      }
+    });
+
+    moveGroupUpButton.addEventListener("click", async () => {
+      if (groupIndex === 0) {
+        return;
+      }
+
+      const reorderedGroups = groups.slice();
+      const [movedGroup] = reorderedGroups.splice(groupIndex, 1);
+      reorderedGroups.splice(groupIndex - 1, 0, movedGroup);
+      await persistGroupSortOrder(reorderedGroups);
+      notify(`Moved group up: ${group.name}`);
+    });
+
+    moveGroupDownButton.addEventListener("click", async () => {
+      if (groupIndex === groups.length - 1) {
+        return;
+      }
+
+      const reorderedGroups = groups.slice();
+      const [movedGroup] = reorderedGroups.splice(groupIndex, 1);
+      reorderedGroups.splice(groupIndex + 1, 0, movedGroup);
+      await persistGroupSortOrder(reorderedGroups);
+      notify(`Moved group down: ${group.name}`);
+    });
 
     saveGroupButton.addEventListener("click", async () => {
       const newName = nameInput.value.trim();
@@ -313,16 +464,126 @@ function renderAdminGroups() {
     if (docs.length === 0) {
       documentsEl.innerHTML = '<li class="empty-state">No documents yet.</li>';
     } else {
-      for (const docRecord of docs) {
+      for (const [docIndex, docRecord] of docs.entries()) {
         const docFragment = adminDocumentTemplate.content.cloneNode(true);
         const li = docFragment.querySelector(".admin-document-item");
         const titleInput = docFragment.querySelector(".doc-title-edit");
         const urlInput = docFragment.querySelector(".doc-url-edit");
+        const dragDocHandle = docFragment.querySelector(".drag-doc-handle");
+        const moveDocUpButton = docFragment.querySelector(".move-doc-up");
+        const moveDocDownButton = docFragment.querySelector(".move-doc-down");
         const saveButton = docFragment.querySelector(".save-doc");
         const deleteButton = docFragment.querySelector(".delete-doc");
 
+        li.dataset.documentId = docRecord.id;
         titleInput.value = docRecord.title;
         urlInput.value = docRecord.url;
+        moveDocUpButton.disabled = docIndex === 0;
+        moveDocDownButton.disabled = docIndex === docs.length - 1;
+
+        dragDocHandle.addEventListener("dragstart", (event) => {
+          draggedDocumentContext = {
+            groupId: group.id,
+            documentId: docRecord.id,
+          };
+          isDocumentDragDirty = false;
+          li.classList.add("is-dragging");
+
+          if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", docRecord.id);
+          }
+        });
+
+        dragDocHandle.addEventListener("dragend", async () => {
+          li.classList.remove("is-dragging");
+
+          const activeDrag = draggedDocumentContext;
+          draggedDocumentContext = null;
+
+          if (!activeDrag) {
+            return;
+          }
+          if (activeDrag.groupId !== group.id || activeDrag.documentId !== docRecord.id || !isDocumentDragDirty) {
+            return;
+          }
+
+          isDocumentDragDirty = false;
+
+          const orderedDocumentIds = Array.from(documentsEl.querySelectorAll(".admin-document-item"))
+            .map((documentItem) => documentItem.dataset.documentId)
+            .filter(Boolean);
+          const docsById = new Map(docs.map((item) => [item.id, item]));
+          const orderedDocuments = orderedDocumentIds.map((documentId) => docsById.get(documentId)).filter(Boolean);
+
+          if (orderedDocuments.length !== docs.length) {
+            notify("Unable to reorder documents. Try refreshing.");
+            return;
+          }
+
+          try {
+            await persistDocumentSortOrder(group.id, orderedDocuments);
+            notify(`Saved document order for ${group.name}.`);
+          } catch (error) {
+            notify(`Failed to save document order: ${error.message}`);
+          }
+        });
+
+        li.addEventListener("dragover", (event) => {
+          if (!draggedDocumentContext) {
+            return;
+          }
+          if (draggedDocumentContext.groupId !== group.id || draggedDocumentContext.documentId === docRecord.id) {
+            return;
+          }
+
+          event.preventDefault();
+          if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "move";
+          }
+
+          const draggedDoc = documentsEl.querySelector(
+            `.admin-document-item[data-document-id="${draggedDocumentContext.documentId}"]`,
+          );
+          if (!draggedDoc) {
+            return;
+          }
+
+          const moved = reorderElementWithinContainer(draggedDoc, li, event.clientY);
+          if (moved) {
+            isDocumentDragDirty = true;
+          }
+        });
+
+        li.addEventListener("drop", (event) => {
+          if (draggedDocumentContext?.groupId === group.id) {
+            event.preventDefault();
+          }
+        });
+
+        moveDocUpButton.addEventListener("click", async () => {
+          if (docIndex === 0) {
+            return;
+          }
+
+          const reorderedDocs = docs.slice();
+          const [movedDoc] = reorderedDocs.splice(docIndex, 1);
+          reorderedDocs.splice(docIndex - 1, 0, movedDoc);
+          await persistDocumentSortOrder(group.id, reorderedDocs);
+          notify(`Moved document up: ${docRecord.title}`);
+        });
+
+        moveDocDownButton.addEventListener("click", async () => {
+          if (docIndex === docs.length - 1) {
+            return;
+          }
+
+          const reorderedDocs = docs.slice();
+          const [movedDoc] = reorderedDocs.splice(docIndex, 1);
+          reorderedDocs.splice(docIndex + 1, 0, movedDoc);
+          await persistDocumentSortOrder(group.id, reorderedDocs);
+          notify(`Moved document down: ${docRecord.title}`);
+        });
 
         saveButton.addEventListener("click", async () => {
           const title = titleInput.value.trim();
@@ -356,12 +617,10 @@ function renderAdminGroups() {
           notify(`Deleted document: ${docRecord.title}`);
         });
 
-        li.dataset.documentId = docRecord.id;
         documentsEl.appendChild(docFragment);
       }
     }
 
-    groupCard.dataset.groupId = group.id;
     adminGroupsEl.appendChild(fragment);
   }
 }
