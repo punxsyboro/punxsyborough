@@ -1,0 +1,261 @@
+:root {
+  --bg: #eef2f6;
+  --panel: #ffffff;
+  --ink: #10202b;
+  --muted: #4f6474;
+  --brand: #0f5d78;
+  --brand-strong: #0a4660;
+  --danger: #9a2b2b;
+  --border: #d4dde4;
+  --shadow: 0 14px 30px rgba(15, 41, 59, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Source Sans 3", "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: linear-gradient(145deg, #f8fbff, #e8edf2 50%, #dbe5ed);
+  position: relative;
+}
+
+.background-glow {
+  position: fixed;
+  inset: -25% auto auto -15%;
+  width: 46rem;
+  height: 46rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(15, 93, 120, 0.15), rgba(15, 93, 120, 0));
+  pointer-events: none;
+}
+
+.site-header {
+  padding: 2.5rem 1.5rem 1.5rem;
+  text-align: center;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-family: "Bitter", Georgia, serif;
+  letter-spacing: 0.03em;
+  font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+}
+
+.site-header p {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+}
+
+.layout {
+  width: min(1160px, 100% - 2rem);
+  margin: 0 auto 2rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+h2 {
+  margin: 0;
+  font-family: "Bitter", Georgia, serif;
+}
+
+.hint {
+  margin: 0.3rem 0 0.9rem;
+  color: var(--muted);
+}
+
+.groups {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+}
+
+.group-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem;
+  background: #fcfdff;
+}
+
+.group-title {
+  margin: 0 0 0.6rem;
+}
+
+.documents {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.document-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.document-item a {
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.document-item a:hover {
+  text-decoration: underline;
+}
+
+.stack {
+  display: grid;
+  gap: 0.6rem;
+}
+
+label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.92rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.52rem 0.58rem;
+  border: 1px solid #b9c7d1;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.inline-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: none;
+  border-radius: 9px;
+  padding: 0.54rem 0.75rem;
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.btn:hover {
+  background: var(--brand-strong);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #426173;
+}
+
+.btn-google {
+  background: #ffffff;
+  color: #1f1f1f;
+  border: 1px solid #cfd7de;
+}
+
+.btn-google:hover {
+  background: #f4f7fa;
+}
+
+.btn-small {
+  padding: 0.4rem 0.65rem;
+  font-size: 0.88rem;
+}
+
+.btn-danger {
+  background: var(--danger);
+}
+
+.status {
+  margin: 0.8rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.group-admin-header {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.admin-document-item {
+  border: 1px solid var(--border);
+  padding: 0.55rem;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.hidden {
+  display: none;
+}
+
+.empty-state {
+  margin: 0;
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (min-width: 760px) {
+  .layout {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+
+  .admin-panel {
+    grid-column: 1 / -1;
+  }
+
+  .inline-form {
+    grid-template-columns: 1.2fr 1.6fr auto;
+    align-items: center;
+  }
+
+  #addGroupForm {
+    grid-template-columns: 1fr auto;
+  }
+
+  .group-admin-header {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .admin-document-item {
+    grid-template-columns: 1fr 1.6fr auto;
+    display: grid;
+    align-items: center;
+  }
+}
